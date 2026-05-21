@@ -142,10 +142,16 @@ button:active {
     margin: 0 auto;
 
     padding: 40px;
+    margin-top: 40px;
+    margin-bottom: 40px;
 
     background-color: #161616;
     box-shadow: 0 0 30px rgba(0,0,0,0.35);
     border-radius: 16px;
+}
+
+#resultScreen {
+    justify-content: flex-start;
 }
 
 .screen {
@@ -961,4 +967,10 @@ button.secondary-button:hover {
 .comment-actions .secondary-button {
     margin-top: 0;
     margin-left: 0;
+}
+
+.selected-answer {
+    background-color: lightblue;
+    border: 2px solid #6ea8ff;
+    transform: scale(1.02);
 }
