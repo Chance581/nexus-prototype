@@ -182,7 +182,7 @@ function loadQuestion(animated = true) {
 
     function populateQuestion() {
 
-        questionEl.textContent = question.question;
+        questionEl.innerHTML = question.question.replaceAll("[[BR]]", "<br>");;
 
         const codeBlock = document.getElementById("codeBlock");
 
@@ -205,13 +205,13 @@ if (question.code) {
 
             button.addEventListener("click", () => {
 
-                Array.from(answerButtons.children).forEach(btn => {
-                    btn.style.backgroundColor = "";
-                });
+Array.from(answerButtons.children).forEach(btn => {
+    btn.classList.remove("selected-answer");
+});
 
-                button.style.backgroundColor = "lightblue";
+button.classList.add("selected-answer");
 
-                selectedAnswer = index;
+selectedAnswer = index;
             });
 
             answerButtons.appendChild(button);
@@ -1203,41 +1203,31 @@ async function sendThreadReply() {
 
 async function loadForumPosts() {
     const postsList = document.getElementById("forumPostsList");
+
     postsList.innerHTML = "<p class='subtle'>Loading posts...</p>";
 
-    const selectedCategory = document.getElementById("forumCategoryFilter").value;
-    const selectedSort = document.getElementById("forumSortFilter").value;
+   let query = supabaseClient
+    .from("forum_posts")
+.select(`
+    *,
+    profiles!forum_posts_user_id_fkey (
+        username,
+        display_name,
+        major,
+        school
+    )
+`)
+    .eq("hidden", false)
+    .order("created_at", { ascending: false })
+    .limit(50);
 
-    let data;
-    let error;
+const selectedCategory = document.getElementById("forumCategoryFilter").value;
 
-    if (selectedSort === "popular") {
-        ({ data, error } = await supabaseClient
-            .rpc("get_popular_forum_posts", {
-                selected_category: selectedCategory
-            }));
-    } else {
-        let query = supabaseClient
-            .from("forum_posts")
-            .select(`
-                *,
-                profiles!forum_posts_user_id_fkey (
-                    username,
-                    display_name,
-                    major,
-                    school
-                )
-            `)
-            .eq("hidden", false)
-            .order("created_at", { ascending: false })
-            .limit(50);
+if (selectedCategory !== "All") {
+    query = query.eq("category", selectedCategory);
+}
 
-        if (selectedCategory !== "All") {
-            query = query.eq("category", selectedCategory);
-        }
-
-        ({ data, error } = await query);
-    }
+const { data, error } = await query;
 
     if (error) {
         console.error("Forum load failed:", error);
@@ -1249,12 +1239,6 @@ async function loadForumPosts() {
         postsList.innerHTML = "<p class='subtle'>No posts yet. Be the first to post.</p>";
         return;
     }
-
-    renderForumPosts(data);
-}
-
-async function renderForumPosts(data) {
-    const postsList = document.getElementById("forumPostsList");
 
     postsList.innerHTML = "";
 
@@ -1292,35 +1276,15 @@ if (!commentCountError && commentRows) {
     });
 }
 
-const { data: upvoteRows, error: upvoteError } = await supabaseClient
-    .from("forum_post_upvotes")
-    .select("post_id")
-    .in("post_id", postIds);
-
-const upvoteCountMap = new Map();
-
-if (!upvoteError && upvoteRows) {
-    upvoteRows.forEach(vote => {
-        upvoteCountMap.set(
-            vote.post_id,
-            (upvoteCountMap.get(vote.post_id) || 0) + 1
-        );
-    });
-}
-
     data.forEach(post => {
         const author =
-    post.profiles?.display_name ||
-    post.profiles?.username ||
-    post.display_name ||
-    post.username ||
+            post.profiles?.display_name ||
+            post.profiles?.username ||
             "Unknown User";
 
         const composite = compositeMap.get(post.user_id);
 
         const replyCount = replyCountMap.get(post.id) || 0;
-
-        const upvoteCount = upvoteCountMap.get(post.id) || 0;
 
 const replyText =
     replyCount === 1 ? "1 reply" : `${replyCount} replies`;
@@ -1346,25 +1310,20 @@ postEl.innerHTML = `
                 <span class="profile-link" data-user-id="${post.user_id}">
                     ${author}
                 </span>
-                · ${post.profiles?.major || post.major || "Unknown major"}
+                · ${post.profiles?.major || "Unknown major"}
                 ${compositeBadge}
                 · ${new Date(post.created_at).toLocaleDateString()}
             </p>
         </div>
 <div class="forum-post-meta-right">
     <span class="forum-replies">
-        ▲ ${upvoteCount}
-    </span>
-
-    <span class="forum-replies">
-       💬 ${replyCount}
+        ${replyText}
     </span>
 
     <span class="forum-category">
         ${post.category || "General"}
     </span>
-</div>
-    </div>
+</div>    </div>
 
     <p>${post.content}</p>
 `;
@@ -1521,28 +1480,6 @@ const editPostButtonHTML = canEditPost
       `
     : "";
 
-    const {data: upvoteRows, error: upvoteError } = await supabaseClient
-    .from("forum_post_upvotes")
-    .select("user_id")
-    .eq("post_id", postId);
-
-    const postUpvoteCount = upvoteRows ? upvoteRows.length : 0;
-
-    const hasUpvoted =  user && upvoteRows?.some(vote => vote.user_id === user.id);
-
-const upvoteButtonHTML = user
-    ? `
-        <button
-            class="secondary-button post-upvote-button ${hasUpvoted ? "active-upvote" : ""}"
-            data-upvoted="${hasUpvoted}"
-        >
-            ▲ ${postUpvoteCount}
-        </button>
-      `
-    : `<span class="forum-replies">▲ ${postUpvoteCount}</span>`;
-
-
-
 threadPost.innerHTML = `
     <div class="forum-post">
         <div class="forum-post-header">
@@ -1566,18 +1503,11 @@ threadPost.innerHTML = `
         </div>
 
         <div class="comment-actions" id="postActions-${post.id}">
-            ${upvoteButtonHTML}
             ${editPostButtonHTML}
             ${deletePostButtonHTML}
         </div>
     </div>
 `;
-
-const upvoteButton = threadPost.querySelector(".post-upvote-button");
-
-upvoteButton.addEventListener("click", () => {
-    togglePostUpvote(post.id, upvoteButton);
-});
 
 const editButton = threadPost.querySelector(".edit-post-button");
 
@@ -1810,61 +1740,6 @@ async function toggleCommentUpvote(commentId, hasUpvoted) {
     }
 
     await loadForumComments(currentForumPostId);
-}
-
-async function togglePostUpvote(postId, button) {
-    const { data: { user } } = await supabaseClient.auth.getUser();
-
-    if (!user) {
-        alert("Sign in to upvote posts.");
-        return;
-    }
-
-    const hasUpvoted =
-        button.dataset.upvoted === "true";
-
-    let error;
-
-    if (hasUpvoted) {
-        ({ error } = await supabaseClient
-            .from("forum_post_upvotes")
-            .delete()
-            .eq("post_id", postId)
-            .eq("user_id", user.id));
-    } else {
-        ({ error } = await supabaseClient
-            .from("forum_post_upvotes")
-            .upsert(
-                {
-                    post_id: postId,
-                    user_id: user.id
-                },
-                {
-                    onConflict: "post_id,user_id"
-                }
-            ));
-    }
-
-    if (error) {
-        console.error("Post upvote failed:", error);
-        return;
-    }
-
-    let currentCount = parseInt(
-        button.textContent.replace("▲", "").trim()
-    );
-
-    if (hasUpvoted) {
-        currentCount--;
-        button.classList.remove("active-upvote");
-        button.dataset.upvoted = "false";
-    } else {
-        currentCount++;
-        button.classList.add("active-upvote");
-        button.dataset.upvoted = "true";
-    }
-
-    button.textContent = `▲ ${currentCount}`;
 }
 
 async function createForumComment() {
@@ -2384,4 +2259,3 @@ document.getElementById("navForum")
 
 document.getElementById("inboxNavButton")
 .addEventListener("click", openInbox);
-
