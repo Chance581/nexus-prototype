@@ -89,7 +89,7 @@ user-generated content, authorization cannot safely depend on frontend
 logic alone.
 
 Nexus uses PostgreSQL Row-Level Security policies. This allows the database to independently
-restrict which records users can read or modify. For example users much rely on a server-side function
+restrict which records users can read or modify. For example, users must rely on a server-side function
 for grade submissions rather than being able to modify their own scores.
 
 This approach reduces the risk of exposing personal information and reduces the likelihood of
@@ -97,7 +97,7 @@ users being able to cheat on the aptitude test.
 
 ## Development
 
-Nexus was developed indepdently from its initial
+Nexus was developed independently from its initial
 prototype through deployment.
 
 Development focused on progressively expanding the system while keeping
@@ -133,7 +133,7 @@ Planned:
 
 ## Running Locally
 Not available currently. I plan to release a modified version of my Supabase code which includes
-relevant functions, tables, and RLS policies without exposing sensetive information about user data or questions.
+relevant functions, tables, and RLS policies without exposing sensitive information about user data or questions.
 
 ## Why I Built It
 I noticed that there were limited resources for CS Students to network, and no generalized CS aptitude tests.
@@ -141,7 +141,7 @@ I built Nexus to allow students to get a general idea of their current aptitude 
 others based on demonstrated results.
 
 ## Future Development
-Potential improvements/features.
+More expansive testing system. New feature that allows CS students with similar skill levels to connect.
 
 ## Author
 Created by Chance. CS student at the University of Michigan.
