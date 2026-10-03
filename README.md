@@ -107,7 +107,7 @@ Moving grading from the frontend to the backend to prevent false score submissio
 
 Adding compatibility for additional tests to further differentiate users.
 
-Created a confidence interval function to prevent small samples of tests from giving users unreliably high/low scores.
+Created a confidence indicator function that shows whether a user’s score is reliable based on number of attempts and range of scores.
 
 ## Project Status
 
