@@ -74,6 +74,8 @@ Private question data is separated from publicly accessible question
 information so that correct answers cannot simply be retrieved by the
 client.
 
+I found an XSS issue when double checking for security flaws. All displayed innerHTML for user generated content is now ran through an escapeHTML function, which converts potentially dangerous characters into harmless text. This was implemented to prevent users from injecting malicious code into other people's sessions.
+
 ### Scoring
 
 Test results are processed into section scores and composite performance
