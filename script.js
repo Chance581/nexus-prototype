@@ -1489,7 +1489,7 @@ async function sendThreadReply() {
     await supabaseClient
     .from("notifications")
     .insert({
-        user_id: currentPublicProfileId,
+        user_id: currentThreadUserId,
         actor_user_id: user.id,
         type: "direct_message",
         content: "You received a new message."
@@ -1622,7 +1622,7 @@ postEl.innerHTML = `
     </span>
 </div>    </div>
 
-    <p>${escapeHTML(post.content)}</p>
+    <p>${escapeHTML(post.edited_content || post.content)}</p>
 `;
 
 const profileLink = postEl.querySelector(".profile-link");
@@ -2475,7 +2475,7 @@ function showEditPostUI(postId, currentContent) {
 }
 
 async function hasUnlockedAdvancedCS() {
-    return true;
+    return false; // Temporarily disable advanced CS unlock check for testing
 
     const { data: { user } } = await supabaseClient.auth.getUser();
 
