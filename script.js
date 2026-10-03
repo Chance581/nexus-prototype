@@ -1,3 +1,12 @@
+function escapeHTML(value) {
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
 document.addEventListener("DOMContentLoaded", () => {
 const startButton = document.getElementById("startButton");
 
@@ -304,7 +313,10 @@ function loadQuestion(animated = true) {
 
     function populateQuestion() {
 
-        questionEl.innerHTML = question.question.replaceAll("[[BR]]", "<br>");;
+        questionEl.innerHTML = question.question
+            .split("[[BR]]")
+            .map(escapeHTML)
+            .join("<br>");
 
         const codeBlock = document.getElementById("codeBlock");
 
@@ -489,12 +501,12 @@ console.log("Section scores:", sectionScores);
 
         row.innerHTML = `
             <div class="category-label">
-                <span>${categoryNames[key]}</span>
-                <span>${displayValue} / ${questionsPerSection}</span>
+                <span>${escapeHTML(categoryNames[key])}</span>
+                <span>${escapeHTML(displayValue)} / ${escapeHTML(questionsPerSection)}</span>
             </div>
 
             <div class="category-bar-bg">
-                <div class="category-bar-fill" style="width: ${percent}%"></div>
+                <div class="category-bar-fill" style="width: ${escapeHTML(percent)}%"></div>
             </div>
         `;
 
@@ -939,10 +951,10 @@ async function loadPreviousScores() {
             `
             : `
                 <p class="subtle">
-                    Analytical: ${scoreRow.analytical_reasoning}/7 ·
-                    DSA: ${scoreRow.data_structures_algorithms}/7 ·
-                    Systems: ${scoreRow.systems}/7 ·
-                    Code: ${scoreRow.code_comprehension}/7
+                    Analytical: ${escapeHTML(scoreRow.analytical_reasoning)}/7 ·
+                    DSA: ${escapeHTML(scoreRow.data_structures_algorithms)}/7 ·
+                    Systems: ${escapeHTML(scoreRow.systems)}/7 ·
+                    Code: ${escapeHTML(scoreRow.code_comprehension)}/7
                 </p>
             `;
 
@@ -952,17 +964,17 @@ async function loadPreviousScores() {
         scoreEntry.innerHTML = `
             <div class="score-entry-top">
                 <strong>
-                    ${benchmarkLabel} ·
-                    ${scoreRow.total_score}/28
+                    ${escapeHTML(benchmarkLabel)} ·
+                    ${escapeHTML(scoreRow.total_score)}/28
                 </strong>
 
                 <span class="score-date">
-                    ${date}
+                    ${escapeHTML(date)}
                 </span>
             </div>
 
             <p class="subtle">
-                ${Number(scoreRow.percentile).toFixed(2)}% percentile
+                ${escapeHTML(Number(scoreRow.percentile).toFixed(2))}% percentile
             </p>
 
             ${categoryHTML}
@@ -1091,19 +1103,19 @@ async function loadLeaderboard() {
 
             entry.innerHTML = `
                 <div class="leaderboard-rank">
-                    #${index + 1}
+                    #${escapeHTML(index + 1)}
                 </div>
 
                 <div class="leaderboard-main">
-                    <h3>${name} — ${scoreRow.total_score}/28</h3>
+                    <h3>${escapeHTML(name)} — ${escapeHTML(scoreRow.total_score)}/28</h3>
 
                     <p class="subtle">
                         Advanced CS Benchmark
                     </p>
 
                     <p class="subtle">
-                        ${profile?.school || "Unknown school"} ·
-                        ${profile?.major || "Unknown major"}
+                        ${escapeHTML(profile?.school || "Unknown school")} ·
+                        ${escapeHTML(profile?.major || "Unknown major")}
                     </p>
                 </div>
             `;
@@ -1167,30 +1179,30 @@ async function loadLeaderboard() {
 
         entry.innerHTML = `
             <div class="leaderboard-rank">
-                #${index + 1}
+                #${escapeHTML(index + 1)}
             </div>
 
             <div class="leaderboard-main">
-                <h3>${name} — ${scoreRow.average_score}/28</h3>
+                <h3>${escapeHTML(name)} — ${escapeHTML(scoreRow.average_score)}/28</h3>
 
                 <p class="subtle">
-                    ${scoreRow.composite_percentile.toFixed(2)}% composite percentile
+                    ${escapeHTML(scoreRow.composite_percentile.toFixed(2))}% composite percentile
                 </p>
 
                 <p class="subtle">
-                    Confidence: ${scoreRow.confidence_level}
+                    Confidence: ${escapeHTML(scoreRow.confidence_level)}
                 </p>
 
                 <p class="subtle">
-                    ${profile?.school || "Unknown school"} ·
-                    ${profile?.major || "Unknown major"}
+                    ${escapeHTML(profile?.school || "Unknown school")} ·
+                    ${escapeHTML(profile?.major || "Unknown major")}
                 </p>
 
                 <p class="subtle">
-                    Analytical: ${scoreRow.average_analytical_reasoning}/7 ·
-                    DSA: ${scoreRow.average_data_structures_algorithms}/7 ·
-                    Systems: ${scoreRow.average_systems}/7 ·
-                    Code: ${scoreRow.average_code_comprehension}/7
+                    Analytical: ${escapeHTML(scoreRow.average_analytical_reasoning)}/7 ·
+                    DSA: ${escapeHTML(scoreRow.average_data_structures_algorithms)}/7 ·
+                    Systems: ${escapeHTML(scoreRow.average_systems)}/7 ·
+                    Code: ${escapeHTML(scoreRow.average_code_comprehension)}/7
                 </p>
             </div>
         `;
@@ -1329,10 +1341,10 @@ async function loadInbox() {
 
         entry.innerHTML = `
             <div class="message-header">
-                <strong>${name}</strong>
-                <span class="score-date">${new Date(convo.latestMessage.created_at).toLocaleDateString()}</span>
+                <strong>${escapeHTML(name)}</strong>
+                <span class="score-date">${escapeHTML(new Date(convo.latestMessage.created_at).toLocaleDateString())}</span>
             </div>
-            <p class="subtle">${convo.latestMessage.content}</p>
+            <p class="subtle">${escapeHTML(convo.latestMessage.content)}</p>
         `;
 
         entry.addEventListener("click", () => {
@@ -1382,8 +1394,8 @@ async function openThread(otherUserId, name) {
         bubble.classList.add(isMine ? "my-message" : "their-message");
 
         bubble.innerHTML = `
-            <p>${message.content}</p>
-            <span>${new Date(message.created_at).toLocaleString()}</span>
+            <p>${escapeHTML(message.content)}</p>
+            <span>${escapeHTML(new Date(message.created_at).toLocaleString())}</span>
         `;
 
         threadMessages.appendChild(bubble);
@@ -1590,27 +1602,27 @@ const compositeBadge = composite
 postEl.innerHTML = `
     <div class="forum-post-header">
         <div>
-            <h2>${post.title}</h2>
+            <h2>${escapeHTML(post.title)}</h2>
             <p class="subtle">
-                <span class="profile-link" data-user-id="${post.user_id}">
-                    ${author}
+                <span class="profile-link" data-user-id="${escapeHTML(post.user_id)}">
+                    ${escapeHTML(author)}
                 </span>
-                · ${post.profiles?.major || "Unknown major"}
-                ${compositeBadge}
-                · ${new Date(post.created_at).toLocaleDateString()}
+                · ${escapeHTML(post.profiles?.major || "Unknown major")}
+                ${escapeHTML(compositeBadge)}
+                · ${escapeHTML(new Date(post.created_at).toLocaleDateString())}
             </p>
         </div>
 <div class="forum-post-meta-right">
     <span class="forum-replies">
-        ${replyText}
+        ${escapeHTML(replyText)}
     </span>
 
     <span class="forum-category">
-        ${post.category || "General"}
+        ${escapeHTML(post.category || "General")}
     </span>
 </div>    </div>
 
-    <p>${post.content}</p>
+    <p>${escapeHTML(post.content)}</p>
 `;
 
 const profileLink = postEl.querySelector(".profile-link");
@@ -1742,7 +1754,7 @@ const canDeletePost =
 
 const deletePostButtonHTML = canDeletePost
     ? `
-        <button class="secondary-button" onclick="hideForumPost(${post.id})">
+        <button class="secondary-button delete-post-button" data-post-id="${escapeHTML(post.id)}">
             Delete Thread
         </button>
       `
@@ -1758,7 +1770,7 @@ const editPostButtonHTML = canEditPost
     ? `
         <button
             class="secondary-button edit-post-button"
-            data-post-id="${post.id}"
+            data-post-id="${escapeHTML(post.id)}"
         >
             Edit Thread
         </button>
@@ -1769,25 +1781,25 @@ threadPost.innerHTML = `
     <div class="forum-post">
         <div class="forum-post-header">
             <div>
-                <h2>${post.title}</h2>
+                <h2>${escapeHTML(post.title)}</h2>
                 <p class="subtle">
-                    <span class="profile-link" data-user-id="${post.user_id}">
-                    ${author}
+                    <span class="profile-link" data-user-id="${escapeHTML(post.user_id)}">
+                    ${escapeHTML(author)}
                     </span>
-                     · ${post.profiles?.major || "Unknown major"}
-                    ${compositeBadge}
-                     · ${new Date(post.created_at).toLocaleDateString()}
+                     · ${escapeHTML(post.profiles?.major || "Unknown major")}
+                    ${escapeHTML(compositeBadge)}
+                     · ${escapeHTML(new Date(post.created_at).toLocaleDateString())}
                      ${post.edited_at ? " · edited" : ""}
                  </p>
             </div>
-            <span class="forum-category">${post.category || "General"}</span>
+            <span class="forum-category">${escapeHTML(post.category || "General")}</span>
         </div>
 
-        <div id="postContent-${post.id}">
-            <p>${displayedPostContent}</p>
+        <div id="postContent-${escapeHTML(post.id)}">
+            <p>${escapeHTML(displayedPostContent)}</p>
         </div>
 
-        <div class="comment-actions" id="postActions-${post.id}">
+        <div class="comment-actions" id="postActions-${escapeHTML(post.id)}">
             ${editPostButtonHTML}
             ${deletePostButtonHTML}
         </div>
@@ -1799,6 +1811,14 @@ const editButton = threadPost.querySelector(".edit-post-button");
 if (editButton) {
     editButton.addEventListener("click", () => {
         showEditPostUI(post.id, displayedPostContent);
+    });
+}
+
+const deletePostButton = threadPost.querySelector(".delete-post-button");
+
+if (deletePostButton) {
+    deletePostButton.addEventListener("click", () => {
+        hideForumPost(post.id);
     });
 }
 
@@ -1905,7 +1925,7 @@ if (!upvoteError && upvoteRows) {
 
 const deleteButtonHTML = canDelete
     ? `
-        <button class="secondary-button" onclick="hideForumComment(${comment.id})">
+        <button class="secondary-button delete-comment-button" data-comment-id="${escapeHTML(comment.id)}">
             Delete
         </button>
       `
@@ -1919,13 +1939,13 @@ const hasUpvoted = userUpvotedSet.has(comment.id);
 const upvoteButtonHTML = user
     ? `
         <button
-            class="secondary-button comment-upvote-button ${hasUpvoted ? "active-upvote" : ""}"
-            data-comment-id="${comment.id}"
+            class="secondary-button comment-upvote-button ${escapeHTML(hasUpvoted ? "active-upvote" : "")}"
+            data-comment-id="${escapeHTML(comment.id)}"
         >
-            ▲ ${upvoteCount}
+            ▲ ${escapeHTML(upvoteCount)}
         </button>
       `
-    : `<span class="forum-replies">▲ ${upvoteCount}</span>`;
+    : `<span class="forum-replies">▲ ${escapeHTML(upvoteCount)}</span>`;
 
 const canEdit =
     user &&
@@ -1935,7 +1955,7 @@ const editButtonHTML = canEdit
     ? `
         <button
             class="secondary-button edit-comment-button"
-            data-comment-id="${comment.id}"
+            data-comment-id="${escapeHTML(comment.id)}"
         >
             Edit
         </button>
@@ -1945,22 +1965,22 @@ const editButtonHTML = canEdit
 commentEl.innerHTML = `
     <div class="message-header">
         <strong>
-            <span class="profile-link" data-user-id="${comment.user_id}">
-                ${author}
+            <span class="profile-link" data-user-id="${escapeHTML(comment.user_id)}">
+                ${escapeHTML(author)}
             </span>
         </strong>
 
         <span class="score-date">
-            ${new Date(comment.created_at).toLocaleDateString()}
+            ${escapeHTML(new Date(comment.created_at).toLocaleDateString())}
             ${comment.edited_at ? " · edited" : ""}
         </span>
     </div>
 
-    <div id="commentContent-${comment.id}">
-        <p>${displayedContent}</p>
+    <div id="commentContent-${escapeHTML(comment.id)}">
+        <p>${escapeHTML(displayedContent)}</p>
     </div>
 
-<div class="comment-actions" id="commentActions-${comment.id}">
+<div class="comment-actions" id="commentActions-${escapeHTML(comment.id)}">
     ${upvoteButtonHTML}
     ${editButtonHTML}
     ${deleteButtonHTML}
@@ -1988,6 +2008,14 @@ if (upvoteButton) {
 if (editButton) {
     editButton.addEventListener("click", () => {
         showEditCommentUI(comment.id, displayedContent);
+    });
+}
+
+const deleteCommentButton = commentEl.querySelector(".delete-comment-button");
+
+if (deleteCommentButton) {
+    deleteCommentButton.addEventListener("click", () => {
+        hideForumComment(comment.id);
     });
 }
 
@@ -2142,26 +2170,26 @@ function renderCompositeScore(container, composite, showExplanation = false) {
     container.innerHTML = `
         <div class="score-entry">
             <div class="score-entry-top">
-                <strong>${Number(composite.average_score).toFixed(2)}/28</strong>
+                <strong>${escapeHTML(Number(composite.average_score).toFixed(2))}/28</strong>
                 <span class="score-date">
-                    ${Number(composite.composite_percentile).toFixed(2)}% percentile
+                    ${escapeHTML(Number(composite.composite_percentile).toFixed(2))}% percentile
                 </span>
             </div>
 
             <p class="subtle">
-                Confidence: <strong>${composite.confidence_level}</strong>
+                Confidence: <strong>${escapeHTML(composite.confidence_level)}</strong>
             </p>
 
             <p class="subtle">
-                Based on ${composite.attempt_count} recent attempt${composite.attempt_count === 1 ? "" : "s"}
-                with a ${composite.score_range}-point recent score range.
+                Based on ${escapeHTML(composite.attempt_count)} recent attempt${composite.attempt_count === 1 ? "" : "s"}
+                with a ${escapeHTML(composite.score_range)}-point recent score range.
             </p>
 
             <p class="subtle">
-                Analytical: ${Number(composite.average_analytical_reasoning).toFixed(2)}/7 ·
-                DSA: ${Number(composite.average_data_structures_algorithms).toFixed(2)}/7 ·
-                Systems: ${Number(composite.average_systems).toFixed(2)}/7 ·
-                Code: ${Number(composite.average_code_comprehension).toFixed(2)}/7
+                Analytical: ${escapeHTML(Number(composite.average_analytical_reasoning).toFixed(2))}/7 ·
+                DSA: ${escapeHTML(Number(composite.average_data_structures_algorithms).toFixed(2))}/7 ·
+                Systems: ${escapeHTML(Number(composite.average_systems).toFixed(2))}/7 ·
+                Code: ${escapeHTML(Number(composite.average_code_comprehension).toFixed(2))}/7
             </p>
 
             ${explanationHTML}
@@ -2393,18 +2421,25 @@ function showEditCommentUI(commentId, currentContent) {
     }
 
     contentEl.innerHTML = `
-        <textarea id="editTextarea-${commentId}" class="comment-edit-box">${currentContent}</textarea>
+        <textarea id="editTextarea-${escapeHTML(commentId)}" class="comment-edit-box">${escapeHTML(currentContent)}</textarea>
 
         <div class="edit-actions">
-            <button class="secondary-button" onclick="editForumComment(${commentId})">
+            <button class="secondary-button save-comment-edit-button">
                 Save
             </button>
 
-            <button class="secondary-button" onclick="loadForumComments(currentForumPostId)">
+            <button class="secondary-button cancel-comment-edit-button">
                 Cancel
             </button>
         </div>
     `;
+
+    contentEl.querySelector(".save-comment-edit-button").addEventListener("click", () => {
+        editForumComment(commentId);
+    });
+    contentEl.querySelector(".cancel-comment-edit-button").addEventListener("click", () => {
+        loadForumComments(currentForumPostId);
+    });
 }
 
 function showEditPostUI(postId, currentContent) {
@@ -2418,18 +2453,25 @@ function showEditPostUI(postId, currentContent) {
     }
 
     contentEl.innerHTML = `
-        <textarea id="editPostTextarea-${postId}" class="comment-edit-box">${currentContent}</textarea>
+        <textarea id="editPostTextarea-${escapeHTML(postId)}" class="comment-edit-box">${escapeHTML(currentContent)}</textarea>
 
         <div class="edit-actions">
-            <button class="secondary-button" onclick="editForumPost(${postId})">
+            <button class="secondary-button save-post-edit-button">
                 Save
             </button>
 
-            <button class="secondary-button" onclick="openForumThread(${postId})">
+            <button class="secondary-button cancel-post-edit-button">
                 Cancel
             </button>
         </div>
     `;
+
+    contentEl.querySelector(".save-post-edit-button").addEventListener("click", () => {
+        editForumPost(postId);
+    });
+    contentEl.querySelector(".cancel-post-edit-button").addEventListener("click", () => {
+        openForumThread(postId);
+    });
 }
 
 async function hasUnlockedAdvancedCS() {
